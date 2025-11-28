@@ -33,7 +33,7 @@ c.DockerSpawner.debug = True
 # Hub 在 Docker network 裡對其他容器的位址/port
 c.JupyterHub.hub_ip = "jupyterhub"
 c.JupyterHub.hub_port = 8080
-c.JupyterHub.bind_url = "http://:8000"
+c.JupyterHub.bind_url = "http://:8888"
 c.JupyterHub.trusted_downstream_ips = ["0.0.0.0/0"]
 
 # Hub 自己的 DB / cookie secrets 存在 /data（會對應到 Docker volume）
