@@ -1,0 +1,27 @@
+services:
+  hub:
+    build: 
+      context: .
+      dockerfile: Dockerfile.jupyterhub
+    container_name: jupyterhub
+    restart: unless-stopped
+    networks:
+      - jupyterhub-network
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py:ro
+      - jupyterhub-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+    environment:
+      JUPYTERHUB_ADMIN: admin
+      DOCKER_NOTEBOOK_IMAGE: quay.io/jupyter/base-notebook:latest
+      DOCKER_NOTEBOOK_DIR: /home/jupyterhub/work
+      DOCKER_NETWORK_NAME: jupyterhub-network
+
+volumes:
+  jupyterhub-data:
+
+networks:
+  jupyterhub-network:
+    name: jupyterhub-network

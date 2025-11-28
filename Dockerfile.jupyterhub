@@ -1,0 +1,9 @@
+FROM jupyterhub/jupyterhub:5
+
+# 安裝 DockerSpawner + NativeAuthenticator
+RUN python3 -m pip install --no-cache-dir \
+    dockerspawner \
+    jupyterhub-nativeauthenticator
+
+# 指定使用我們外掛進來的設定檔
+CMD ["jupyterhub", "-f", "/srv/jupyterhub/jupyterhub_config.py"]
