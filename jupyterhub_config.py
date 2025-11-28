@@ -23,7 +23,7 @@ c.DockerSpawner.notebook_dir = notebook_dir
 # 每個 user 的 Notebook 實體檔案，寫到 D:\jupyterhub\notebooks\{username}
 # 注意：這是「Docker host（WSL）」的路徑，所以用 /mnt/d/...
 c.DockerSpawner.volumes = {
-    "/mnt/d/jupyterhub/notebooks/{username}": notebook_dir,
+    "~/jupyterhub/notebooks/{username}": notebook_dir,
 }
 
 # 使用者停止 server 時，順便把舊 container 清掉
