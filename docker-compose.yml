@@ -1,8 +1,9 @@
 services:
   hub:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.jupyterhub
+    image: jupyterhub-hub
     container_name: jupyterhub
     restart: unless-stopped
     networks:
@@ -15,9 +16,22 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:rw
     environment:
       JUPYTERHUB_ADMIN: admin
-      DOCKER_NOTEBOOK_IMAGE: quay.io/jupyter/base-notebook:latest
-      DOCKER_NOTEBOOK_DIR: /home/jupyterhub/work
+      DOCKER_NOTEBOOK_IMAGE: jupyter-gpu-notebook
+      DOCKER_NOTEBOOK_DIR: /home/jovyan
       DOCKER_NETWORK_NAME: jupyterhub-network
+    depends_on:
+      - singleuser-image              # 先 build singleuser image
+
+  # 只用來 build single-user image，Hub 會用這個 image 來 spawn user 容器
+  singleuser-image:
+    build:
+      context: .
+      dockerfile: Dockerfile.singleuser
+    image: jupyter-gpu-notebook
+    command: "true"
+    restart: "no"
+    networks:
+      - jupyterhub-network
 
 volumes:
   jupyterhub-data:

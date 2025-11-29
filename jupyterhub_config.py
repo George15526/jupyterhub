@@ -5,25 +5,42 @@ c = get_config()  # type: ignore[name-defined]
 # --- Spawner: 每個 user 一個 Docker 容器 ---
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
 
-# 使用者 Notebook 所用的 image（從環境變數讀，給 docker-compose 設定）
+# single-user 容器使用的 image
 c.DockerSpawner.image = os.environ.get(
     "DOCKER_NOTEBOOK_IMAGE",
-    "quay.io/jupyter/base-notebook:latest",
+    "jupyter-gpu-notebook",
 )
 
-# Hub 跟 user 容器共用的 Docker network
-network_name = os.environ.get("DOCKER_NETWORK_NAME", "jupyterhub-network")
-c.DockerSpawner.use_internal_ip = True
-c.DockerSpawner.network_name = network_name
+# 啟動指令（避免再去讀 image Config.Cmd）
+c.DockerSpawner.cmd = ["start-singleuser.sh"]
 
-# Notebook 在容器裡的路徑
-notebook_dir = os.environ.get("DOCKER_NOTEBOOK_DIR", "/home/jupyterhub/work")
+# Notebook 目錄（容器內）
+notebook_dir = os.environ.get("DOCKER_NOTEBOOK_DIR", "/home/jovyan")
 c.DockerSpawner.notebook_dir = notebook_dir
 
-# 每個 user 的 Notebook 實體檔案，寫到 D:\jupyterhub\notebooks\{username}
-# 注意：這是「Docker host（WSL）」的路徑，所以用 /mnt/d/...
+# 1. 把使用者資料掛到實體主機
+#    host:  /home/nknul40s/jupyterhub/notebooks/<username>
+#    container: /home/jovyan (notebook_dir)
 c.DockerSpawner.volumes = {
-    "~/jupyterhub/notebooks/{username}": notebook_dir,
+    "/home/nknul40s/jupyterhub/notebooks/{username}": notebook_dir,
+}
+
+# 2. 讓 single-user 容器加到 jupyterhub-network
+c.DockerSpawner.use_internal_ip = True
+c.DockerSpawner.network_name = os.environ.get(
+    "DOCKER_NETWORK_NAME", "jupyterhub-network"
+)
+
+# 3. 啟用 GPU (--gpus all 等價設定)
+c.DockerSpawner.extra_host_config = {
+    "network_mode": os.environ.get("DOCKER_NETWORK_NAME", "jupyterhub-network"),
+    "device_requests": [
+        {
+            "Driver": "nvidia",
+            "Count": -1,            # -1 = all GPUs
+            "Capabilities": [["gpu"]],
+        }
+    ],
 }
 
 # 使用者停止 server 時，順便把舊 container 清掉

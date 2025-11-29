@@ -1,0 +1,24 @@
+# Dockerfile.singleuser
+FROM quay.io/jupyter/base-notebook:latest
+
+# 切到 root 安裝系統套件
+USER root
+
+# 安裝 git
+RUN apt-get update && \
+    apt-get install -y git && \
+    rm -rf /var/lib/apt/lists/*
+
+# 安裝 GPU 版 PyTorch（範例，用 pip，你可以依需求調版本）
+# 如果 host 上是 CUDA 12.1，可用官方 cu121 wheels：
+RUN pip install --no-cache-dir \
+    torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# 之後你還可以在這裡加上 tensorflow、transformers 等需要的套件
+# RUN pip install --no-cache-dir tensorflow ...
+
+# 回到預設 jovyan user
+USER $NB_UID
+
+# 給 JupyterHub 用的啟動指令
+CMD ["start-singleuser.sh"]
