@@ -40,6 +40,6 @@ sudo docker compose up -d --build
 > The last step in cloudflare, cause the frontend page of the jupyterhub is kind of special, I create a specific settings for this hostname. (And it got me crazy :D)
 
 ## How to use it?
-1. Search `https://jupyterhub.sdpmlab.org` on website
+1. Search https://jupyterhub.sdpmlab.org on website
 2. Login / Sign up the system
 3. Start your travel on Jupyter Notebook
