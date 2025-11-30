@@ -33,10 +33,8 @@ c.DockerSpawner.network_name = os.environ.get(
 
 # 3. 啟用 GPU (--gpus all 等價設定)
 c.DockerSpawner.extra_host_config = {
-    "network_mode": os.environ.get("DOCKER_NETWORK_NAME", "jupyterhub-network"),
     "device_requests": [
         {
-            "Driver": "nvidia",
             "Count": -1,            # -1 = all GPUs
             "Capabilities": [["gpu"]],
         }
