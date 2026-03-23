@@ -15,14 +15,14 @@ c.DockerSpawner.image = os.environ.get(
 c.DockerSpawner.cmd = ["start-singleuser.sh"]
 
 # Notebook 目錄（容器內）
-notebook_dir = os.environ.get("DOCKER_NOTEBOOK_DIR", "/home/jovyan")
+notebook_dir = "/home/jovyan/work"
 c.DockerSpawner.notebook_dir = notebook_dir
 
 # 1. 把使用者資料掛到實體主機
-#    host:  /home/nknul40s/jupyterhub/notebooks/<username>
+#    host:  /mnt/data/jupyterhub/users/<username>
 #    container: /home/jovyan (notebook_dir)
 c.DockerSpawner.volumes = {
-    "/home/nknul40s/jupyterhub/notebooks/{username}": notebook_dir,
+    "/mnt/data/jupyterhub/users/{username}": notebook_dir,
 }
 
 # 2. 讓 single-user 容器加到 jupyterhub-network
@@ -42,14 +42,18 @@ c.DockerSpawner.extra_host_config = {
 }
 
 # 使用者停止 server 時，順便把舊 container 清掉
-c.DockerSpawner.remove = True
+c.DockerSpawner.remove = False
 c.DockerSpawner.debug = True
 
 # Hub 在 Docker network 裡對其他容器的位址/port
-c.JupyterHub.hub_ip = "jupyterhub"
+c.JupyterHub.hub_ip = "0.0.0.0"
+c.JupyterHub.hub_connect_ip = "jupyterhub"
 c.JupyterHub.hub_port = 8080
 c.JupyterHub.bind_url = "http://:8888"
 c.JupyterHub.trusted_downstream_ips = ["0.0.0.0/0"]
+
+c.Spawner.http_timeout = 120
+c.Spawner.start_timeout = 120
 
 # Hub 自己的 DB / cookie secrets 存在 /data（會對應到 Docker volume）
 c.JupyterHub.cookie_secret_file = "/data/jupyterhub_cookie_secret"
@@ -69,3 +73,4 @@ c.NativeAuthenticator.minimum_password_length = 8
 admin = os.environ.get("JUPYTERHUB_ADMIN")
 if admin:
     c.Authenticator.admin_users = {admin}
+

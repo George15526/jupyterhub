@@ -17,7 +17,7 @@ services:
     environment:
       JUPYTERHUB_ADMIN: admin
       DOCKER_NOTEBOOK_IMAGE: jupyter-gpu-notebook
-      DOCKER_NOTEBOOK_DIR: /home/jovyan
+      DOCKER_NOTEBOOK_DIR: /home/jovyan/work
       DOCKER_NETWORK_NAME: jupyterhub-network
     depends_on:
       - singleuser-image              # 先 build singleuser image
@@ -35,6 +35,11 @@ services:
 
 volumes:
   jupyterhub-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /mnt/data/jupyterhub
+      o: bind
 
 networks:
   jupyterhub-network:
