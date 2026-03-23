@@ -4,10 +4,6 @@ FROM quay.io/jupyter/base-notebook:latest
 # 切到 root 安裝系統套件
 USER root
 
-FROM quay.io/jupyter/base-notebook:latest
-
-USER root
-
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y sudo && \
