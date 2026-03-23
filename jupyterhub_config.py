@@ -21,8 +21,9 @@ c.DockerSpawner.notebook_dir = notebook_dir
 # 1. 把使用者資料掛到實體主機
 #    host:  /mnt/data/jupyterhub/users/<username>
 #    container: /home/jovyan (notebook_dir)
+HOST_NOTEBOOK_DIR = "/mnt/data/jupyterhub/users/{username}"
 c.DockerSpawner.volumes = {
-    "/mnt/data/jupyterhub/users/{username}": notebook_dir,
+    HOST_NOTEBOOK_DIR: notebook_dir,
 }
 
 # 2. 讓 single-user 容器加到 jupyterhub-network
@@ -74,3 +75,30 @@ admin = os.environ.get("JUPYTERHUB_ADMIN")
 if admin:
     c.Authenticator.admin_users = {admin}
 
+async def ensure_user_dir(spawner):
+    host_dir = spawner.format_string(HOST_NOTEBOOK_DIR)
+
+    os.makedirs(host_dir, exist_ok=True)
+
+    try:
+        os.chown(host_dir, 1000, 100)
+    except FileNotFoundError:
+        pass
+
+    os.chmod(host_dir, 0o755)
+
+    cache_dir = os.path.join(host_dir, ".cache")
+    torchinductor_dir = os.path.join(cache_dir, "torchinductor")
+    triton_dir = os.path.join(cache_dir, "triton")
+    tmp_dir = os.path.join(host_dir, ".tmp")
+
+    for path in [cache_dir, torchinductor_dir, triton_dir, tmp_dir]:
+        os.makedirs(path, exist_ok=True)
+        try:
+            os.chown(path, 1000, 100)
+        except FileNotFoundError:
+            pass
+        os.chmod(path, 0o755)
+
+
+c.Spawner.pre_spawn_hook = ensure_user_dir
